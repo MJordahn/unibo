@@ -6,7 +6,7 @@ from surrogates.deep_ensemble import DeepEnsemble
 from surrogates.dummy_surrogate import DummySurrogate
 from surrogates.gaussian_process import GaussianProcess
 from surrogates.random_forest import RandomForest
-from surrogates.bayesian_neural_network import BayesianNeuralNetwork
+from surrogates.bayesian_neural_network import BayesianNeuralNetwork, BayesianNeuralNetwork_Medium
 from botorch.generation.sampling import MaxPosteriorSampling
 from botorch.optim import optimize_acqf
 from acquisitions.botorch_acqs import (
@@ -35,6 +35,9 @@ class Optimizer(object):
             self.surrogate_model = self.surrogate_object
         elif self.surrogate == "BNN":
             self.surrogate_object = BayesianNeuralNetwork(self.parameters, dataset)
+            self.surrogate_model = self.surrogate_object
+        elif self.surrogate == "BNN_Medium":
+            self.surrogate_object = BayesianNeuralNetwork_Medium(self.parameters, dataset)
             self.surrogate_model = self.surrogate_object
         elif self.surrogate == "DE":
             self.surrogate_object = DeepEnsemble(self.parameters, dataset)
