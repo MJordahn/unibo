@@ -121,7 +121,7 @@ class MinPosteriorSampling(SamplingStrategy):
             # num_samples x batch_shape x N x m
             samples = posterior.rsample(sample_shape=torch.Size([num_samples]))
             return self.minimize_samples(X, samples, num_samples)
-        elif self.surrogate_type == "BNN":
+        elif self.surrogate_type == "BNN" or self.surrogate_type == "BNN_Medium":
             X = X.permute(1, 0, 2)
             posterior = self.model.posterior(
                 X,
