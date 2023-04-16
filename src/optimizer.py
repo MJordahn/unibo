@@ -16,6 +16,7 @@ from acquisitions.botorch_acqs import (
 from src.recalibrator import Recalibrator
 from acquisitions.min_posterior_sampling import MinPosteriorSampling
 import warnings
+from scipy import spatial 
 
 
 class Optimizer(object):
@@ -130,6 +131,11 @@ class Optimizer(object):
                     X_pool_entire[[idxs[i_choice]], :],
                     "N/A",
                 )
+        elif self.parameters.optim_method == "Grad" and self.parameters.acquisition=="EI":
+            bounds = np.array([np.array(dataset.data.x_lbs), np.array(dataset.data.x_ubs)])
+            bounds_scaled = (bounds - dataset.data.X_mean_pool_scaling) / dataset.data.X_std_pool_scaling
+            candidates, acq_value = optimize_acqf(self.acquisition_function, torch.tensor(bounds_scaled), 1, 10, 20)
+            return candidates, acq_value, None
         else:
             X_pool_torch = torch.from_numpy(np.expand_dims(X_pool, 1))
 

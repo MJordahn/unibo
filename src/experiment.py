@@ -8,6 +8,7 @@ from .parameters import Parameters
 from src.recalibrator import Recalibrator
 
 
+
 class Experiment(object):
     def __init__(self, parameters: Parameters) -> None:
         self.__dict__.update(asdict(parameters))
@@ -16,6 +17,7 @@ class Experiment(object):
         self.dataset = Dataset(parameters)
         self.optimizer = Optimizer(parameters)
         self.metrics = Metrics(parameters)
+        self.optim_method = parameters.optim_method
 
     def __str__(self):
         return (
@@ -57,19 +59,31 @@ class Experiment(object):
                     if self.recalibrate
                     else None
                 )
-                # BO iteration
-                x_next, acq_val, i_choice = self.optimizer.bo_iter(
-                    self.dataset,
-                    X_pool=self.dataset.data.X_pool,
-                    recalibrator=recalibrator,
-                    return_idx=True,
-                )
-                y_next = self.dataset.data.y_pool[[i_choice]]
-                f_next = (
-                    self.dataset.data.f_pool[[i_choice]]
-                    if not self.dataset.data.real_world
-                    else None
-                )
+                if self.optim_method != "Grad":
+                    # BO iteration
+                    x_next, acq_val, i_choice = self.optimizer.bo_iter(
+                        self.dataset,
+                        X_pool=self.dataset.data.X_pool,
+                        recalibrator=recalibrator,
+                        return_idx=True,
+                    )
+                    y_next = self.dataset.data.y_pool[[i_choice]]
+                    f_next = (
+                        self.dataset.data.f_pool[[i_choice]]
+                        if not self.dataset.data.real_world
+                        else None
+                    )                    
+                else:
+                    x_next, acq_val, i_choice = self.optimizer.bo_iter(
+                        self.dataset,
+                        X_pool=self.dataset.data.X_pool,
+                        recalibrator=recalibrator,
+                        return_idx=True,
+                    )
+                    x_next_unscaled = x_next[0].detach().numpy()*self.dataset.data.X_std_pool_scaling + self.dataset.data.X_mean_pool_scaling
+                    f_next = self.dataset.data.problem.evaluate(x_next_unscaled)
+                    y_next = f_next + np.random.normal(loc=0, scale=self.dataset.data.noise_std, size=1)
+                    x_next, y_next, f_next = self.dataset.data.standardize([x_next_unscaled], [y_next], [[f_next]])
 
                 # add to dataset
                 self.dataset.add_data(x_next, y_next, f_next, i_choice=i_choice)

@@ -21,15 +21,15 @@ class SVM_Wine(object):
         self.sample_initial_dataset()
 
     def sample_initial_dataset(self) -> None:
-        self.X_full = np.load("./datasets/SVM/optim_dataset/hyperparams.npy")
-        self.y_full = -np.load("./datasets/SVM/optim_dataset/accuracies.npy")
+        self.X_full_origin = np.load("./datasets/SVM/optim_dataset/hyperparams.npy")
+        self.y_full_origin = -np.load("./datasets/SVM/optim_dataset/accuracies.npy")
         # self.y_test = np.load("./datasets/MNIST/optim_dataset/losses.npy")
 
         self.X_full = (
-            self.X_full[:, np.newaxis] if self.X_full.ndim == 1 else self.X_full
+            self.X_full_origin[:, np.newaxis] if self.X_full_origin.ndim == 1 else self.X_full_origin
         )
         self.y_full = (
-            self.y_full[:, np.newaxis] if self.y_full.ndim == 1 else self.y_full
+            self.y_full_origin[:, np.newaxis] if self.y_full_origin.ndim == 1 else self.y_full_origin
         )
 
         test_idxs = np.random.permutation(len(self.X_full))[:self.n_test]

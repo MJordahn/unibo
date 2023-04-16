@@ -47,7 +47,8 @@ class Parameters:
     experiment: str = ""  # folder name
     n_seeds_per_job: int = 1 #Select how many jobs to run for this particular seed. Set via input params only.
     save_scratch: bool = False #If want results saved on scratch directory.
-
+    optim_method: str = "Default" #Toggle to "grad" if we want to use gradient optimised AF
+ 
     def __init__(self, kwargs: Dict = {}, mkdir: bool = False) -> None:
         self.update(kwargs)
         if self.surrogate == "RS" and (self.recalibrate or self.bo):
