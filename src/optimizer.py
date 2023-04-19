@@ -8,6 +8,7 @@ from surrogates.gaussian_process import GaussianProcess
 from surrogates.random_forest import RandomForest
 from surrogates.bayesian_neural_network import BayesianNeuralNetwork, BayesianNeuralNetwork_Medium
 from botorch.generation.sampling import MaxPosteriorSampling
+from botorch.acquisition import ExpectedImprovement as EIBoTorch
 from botorch.optim import optimize_acqf
 from acquisitions.botorch_acqs import (
     ExpectedImprovement,
@@ -59,13 +60,19 @@ class Optimizer(object):
         if not self.is_fitted:
             raise RuntimeError("Surrogate has not been fitted!")
         y_opt_tensor = torch.tensor(dataset.y_opt.squeeze())
-        if self.acquisition == "EI":
+        if self.acquisition == "EI" and self.parameters.optim_method!="Grad":
             self.acquisition_function = ExpectedImprovement(
                 self.surrogate_model,
                 best_f=y_opt_tensor,
                 maximize=self.maximization,
                 std_change=self.std_change,
                 recalibrator=recalibrator,
+            )
+        elif self.acquisition == "EI" and self.parameters.optim_method=="Grad":
+            self.acquisition_function = EIBoTorch(
+                self.surrogate_model,
+                best_f=y_opt_tensor,
+                maximize=self.maximization,
             )
         elif self.acquisition == "UCB":
             self.acquisition_function = UpperConfidenceBound(
@@ -132,6 +139,7 @@ class Optimizer(object):
                     "N/A",
                 )
         elif self.parameters.optim_method == "Grad" and self.parameters.acquisition=="EI":
+            
             bounds = np.array([np.array(dataset.data.x_lbs), np.array(dataset.data.x_ubs)])
             bounds_scaled = (bounds - dataset.data.X_mean_pool_scaling) / dataset.data.X_std_pool_scaling
             candidates, acq_value = optimize_acqf(self.acquisition_function, torch.tensor(bounds_scaled), 1, 10, 20)

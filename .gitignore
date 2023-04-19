@@ -10,6 +10,8 @@ cluster
 **/.DS_Store
 **/__pycache__
 CodeChart.drawio
+
+### Results folders ###
 results_real_data/
 results_synth_data/
 parsed_results/
@@ -17,6 +19,10 @@ tables/
 results_pertubaion/
 plots/
 article_tables_figures_generators/
+results_gradient_2000_p/
+results_gradient_EI_200_p/
+results_real_data_new_LR/
+
 
 ### VisualStudioCode Patch ###
 # Ignore all local history of files
